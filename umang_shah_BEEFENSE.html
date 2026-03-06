@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>BeEFense — Browser Exploitation Research | Umang Shah | Heriot-Watt Cybersecurity</title>
+<meta name="description" content="BeEFense: Hands-on browser exploitation research by Umang Shah using the BeEF Framework in Kali Linux. Demonstrated live session hijacking, XSS, CSRF and phishing attacks. Developed countermeasures framework. Distinction grade. Heriot-Watt University MSc Cyber Security 2023."/>
+<meta name="keywords" content="BeEF framework, browser exploitation, social engineering attacks, session hijacking, XSS CSRF penetration testing, Kali Linux cybersecurity, Umang Shah Heriot-Watt, ethical hacking India, cybersecurity portfolio Mumbai, offensive security research"/>
+<meta name="author" content="Umang Shah"/>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"ScholarlyArticle","headline":"BeEFense: Browser Exploitation Framework — Attack Demonstration and Countermeasures","author":{"@type":"Person","name":"Umang Shah","alumniOf":{"@type":"CollegeOrUniversity","name":"Heriot-Watt University"}},"datePublished":"2023-04-01","description":"Hands-on demonstration of browser exploitation and social engineering attacks using the BeEF Framework in Kali Linux. Live attack scenarios including session hijacking, XSS, CSRF and phishing. Comprehensive countermeasures framework developed.","keywords":"BeEF framework, browser exploitation, social engineering, session hijacking, XSS, CSRF, Kali Linux, penetration testing","publisher":{"@type":"CollegeOrUniversity","name":"Heriot-Watt University"}}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;500;600;700&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#0a0c10;--paper:#f7f3ec;--warm:#edeae2;
+  --red:#c0392b;--red-l:#e74c3c;--red-p:rgba(192,57,43,0.08);
+  --gold:#b8902a;--gold-l:#d4a93a;
+  --teal:#1a5f5f;--teal-l:#237a7a;
+  --text:#1c1c2a;--muted:#6a6a78;--border:#ddd8cc;
+  --ffd:'Playfair Display',Georgia,serif;
+  --ffs:'Syne',sans-serif;--ffm:'IBM Plex Mono',monospace;
+}
+html{scroll-behavior:smooth}
+body{background:var(--paper);color:var(--text);font-family:var(--ffs);overflow-x:hidden}
+body::after{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");pointer-events:none;z-index:997}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:200;display:flex;align-items:center;justify-content:space-between;padding:0 56px;height:64px;background:rgba(10,12,16,0.95);backdrop-filter:blur(16px);border-bottom:1px solid rgba(255,255,255,0.07)}
+.nav-brand{font-family:var(--ffd);font-size:1rem;color:var(--paper);text-decoration:none}
+.nav-brand span{color:var(--red-l)}
+.nav-back{font-family:var(--ffm);font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:rgba(247,243,236,0.45);text-decoration:none;display:flex;align-items:center;gap:8px;transition:color .2s}
+.nav-back:hover{color:var(--paper)}
+.nav-badge{font-family:var(--ffm);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;background:rgba(192,57,43,0.15);color:var(--red-l);border:1px solid rgba(192,57,43,0.3);padding:6px 16px;border-radius:2px}
+
+/* HERO */
+.hero{background:var(--ink);min-height:92vh;padding:120px 80px 80px;display:grid;grid-template-columns:1fr 420px;gap:80px;align-items:center;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(247,243,236,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(247,243,236,0.025) 1px,transparent 1px);background-size:52px 52px}
+.hero::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 20% 50%,rgba(192,57,43,0.15) 0%,transparent 60%),radial-gradient(ellipse at 90% 20%,rgba(184,144,42,0.08) 0%,transparent 50%)}
+.hero-content{position:relative;z-index:2}
+.hero-tag{display:inline-flex;align-items:center;gap:10px;font-family:var(--ffm);font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;color:var(--red-l);border:1px solid rgba(192,57,43,0.35);border-radius:2px;padding:5px 14px;margin-bottom:24px}
+.hero-tag::before{content:'';width:7px;height:7px;background:var(--red-l);border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+h1.htitle{font-family:var(--ffd);font-size:clamp(2.8rem,5vw,5rem);line-height:1.05;color:var(--paper);margin-bottom:12px;letter-spacing:-.01em}
+h1.htitle em{color:var(--red-l);font-style:italic;display:block}
+.hsub{font-family:var(--ffm);font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;color:rgba(247,243,236,0.4);margin-bottom:28px}
+.hdesc{font-size:1.05rem;color:rgba(247,243,236,0.62);line-height:1.82;max-width:560px;margin-bottom:36px}
+.hdesc strong{color:var(--paper)}
+.hmeta{display:flex;flex-wrap:wrap;gap:28px}
+.hm-item{}
+.hm-label{font-family:var(--ffm);font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;color:rgba(247,243,236,0.3);display:block;margin-bottom:4px}
+.hm-value{font-size:.88rem;color:var(--paper);font-weight:600;display:block}
+
+/* Hero right panel */
+.hero-panel{position:relative;z-index:2}
+.threat-box{background:rgba(192,57,43,0.08);border:1px solid rgba(192,57,43,0.25);border-radius:4px;padding:28px;position:relative;overflow:hidden}
+.threat-box::before{content:'THREAT PROFILE';position:absolute;top:-9px;left:20px;background:var(--ink);padding:0 10px;font-family:var(--ffm);font-size:.58rem;letter-spacing:.18em;color:rgba(192,57,43,0.7)}
+.threat-stat{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid rgba(255,255,255,0.06)}
+.threat-stat:last-child{border-bottom:none}
+.ts-label{font-family:var(--ffm);font-size:.66rem;color:rgba(247,243,236,0.4);letter-spacing:.08em}
+.ts-value{font-family:var(--ffd);font-size:1.05rem;color:var(--red-l);font-weight:700}
+.distinction-badge{margin-top:18px;background:rgba(184,144,42,0.1);border:1px solid rgba(184,144,42,0.3);border-radius:3px;padding:14px 18px;text-align:center}
+.db-label{font-family:var(--ffm);font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;color:rgba(184,144,42,0.6);display:block;margin-bottom:4px}
+.db-value{font-family:var(--ffd);font-size:1.4rem;color:var(--gold);font-weight:700}
+
+/* STAT BAR */
+.stat-bar{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid rgba(255,255,255,0.06)}
+.sb-item{background:var(--ink);padding:28px;text-align:center;border-right:1px solid rgba(255,255,255,0.06);transition:background .2s}
+.sb-item:last-child{border-right:none}
+.sb-item:hover{background:#111318}
+.sb-num{font-family:var(--ffd);font-size:2.2rem;color:var(--red-l);display:block;line-height:1;margin-bottom:7px;font-weight:700}
+.sb-lbl{font-family:var(--ffm);font-size:.62rem;text-transform:uppercase;letter-spacing:.1em;color:rgba(247,243,236,0.35);line-height:1.4}
+
+/* SECTIONS */
+.sec{padding:88px 80px}
+.sec-alt{background:var(--warm)}
+.sec-dk{background:var(--ink);padding:88px 80px}
+.sh{display:flex;align-items:center;gap:18px;margin-bottom:56px}
+.snum{font-family:var(--ffm);font-size:.66rem;color:var(--red-l);letter-spacing:.15em;flex-shrink:0}
+h2.st{font-family:var(--ffd);font-size:clamp(1.7rem,2.8vw,2.5rem);color:var(--text);line-height:1.15}
+.sec-dk h2.st{color:var(--paper)}
+.sec-dk .snum{color:var(--red-l)}
+.sr{flex:1;height:1px;background:var(--border);margin-left:14px}
+.sec-dk .sr{background:rgba(247,243,236,0.08)}
+.fade{opacity:0;transform:translateY(20px);transition:opacity .6s ease,transform .6s ease}
+.fade.in{opacity:1;transform:translateY(0)}
+
+/* CALLOUTS */
+.callout{border-left:3px solid var(--red-l);background:var(--red-p);padding:18px 20px;border-radius:0 4px 4px 0;margin:22px 0;font-size:.93rem;line-height:1.7}
+.callout strong{color:var(--text)}
+.callout.gold{border-left-color:var(--gold);background:rgba(184,144,42,0.07)}
+.callout.teal{border-left-color:var(--teal);background:rgba(26,95,95,0.07)}
+.callout.gold strong,.callout.teal strong{color:var(--text)}
+
+/* ATTACK CARDS */
+.attack-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:28px 0}
+.attack-card{background:var(--ink);border:1px solid rgba(255,255,255,0.07);border-radius:3px;padding:24px;position:relative;overflow:hidden;transition:border-color .2s,transform .2s}
+.attack-card:hover{border-color:rgba(192,57,43,0.4);transform:translateY(-3px)}
+.attack-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--red-l),transparent)}
+.ac-num{font-family:var(--ffm);font-size:.6rem;color:rgba(192,57,43,0.5);letter-spacing:.15em;text-transform:uppercase;margin-bottom:10px;display:block}
+.ac-name{font-family:var(--ffd);font-size:1.1rem;color:var(--paper);margin-bottom:8px}
+.ac-desc{font-size:.82rem;color:rgba(247,243,236,0.45);line-height:1.65}
+.ac-impact{display:inline-flex;align-items:center;gap:6px;margin-top:12px;font-family:var(--ffm);font-size:.65rem;color:var(--red-l);background:rgba(192,57,43,0.1);border:1px solid rgba(192,57,43,0.2);padding:3px 10px;border-radius:2px}
+
+/* STEPS */
+.steps{display:flex;flex-direction:column;gap:0;margin:28px 0}
+.step{display:flex;gap:22px;padding-bottom:32px;position:relative}
+.step:last-child{padding-bottom:0}
+.step-l{display:flex;flex-direction:column;align-items:center;flex-shrink:0}
+.step-num{width:34px;height:34px;border-radius:50%;background:rgba(192,57,43,0.1);border:1px solid rgba(192,57,43,0.3);display:flex;align-items:center;justify-content:center;font-family:var(--ffm);font-size:.7rem;color:var(--red-l);flex-shrink:0}
+.step-line{flex:1;width:1px;background:var(--border);margin-top:6px}
+.step:last-child .step-line{display:none}
+.step-c{padding-top:4px}
+.step-title{font-weight:700;font-size:.92rem;color:var(--text);margin-bottom:6px}
+.step-body{font-size:.86rem;color:var(--muted);line-height:1.65}
+
+/* COUNTERMEASURES */
+.cm-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:24px 0}
+.cm-card{background:var(--warm);border:1px solid var(--border);border-radius:3px;padding:20px;display:flex;gap:14px;align-items:flex-start;transition:border-color .2s,transform .2s}
+.cm-card:hover{border-color:var(--teal);transform:translateX(5px)}
+.cm-ico{font-size:1.3rem;flex-shrink:0;margin-top:1px}
+.cm-title{font-weight:700;font-size:.86rem;color:var(--text);margin-bottom:4px}
+.cm-body{font-size:.8rem;color:var(--muted);line-height:1.6}
+
+/* TAGS */
+.tags{display:flex;flex-wrap:wrap;gap:7px;margin:20px 0}
+.tag{font-family:var(--ffm);font-size:.65rem;background:var(--warm);border:1px solid var(--border);color:var(--muted);padding:3px 10px;border-radius:2px;transition:all .15s;cursor:default}
+.tag:hover{background:var(--red-p);border-color:rgba(192,57,43,0.3);color:var(--red-l)}
+
+/* IMPACT / REAL WORLD */
+.rw-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin:24px 0}
+.rw-card{background:rgba(247,243,236,0.03);border:1px solid rgba(247,243,236,0.08);border-radius:3px;padding:22px;transition:border-color .2s}
+.rw-card:hover{border-color:rgba(184,144,42,0.3)}
+.rw-ico{font-size:1.5rem;margin-bottom:11px;display:block}
+.rw-title{font-weight:700;font-size:.86rem;color:var(--paper);margin-bottom:6px}
+.rw-body{font-size:.8rem;color:rgba(247,243,236,0.42);line-height:1.6}
+
+/* BOTTOM NAV */
+.bottom-nav{background:var(--warm);padding:56px 80px;display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--border)}
+.bn-prev,.bn-next{text-decoration:none;display:flex;flex-direction:column;gap:5px}
+.bn-label{font-family:var(--ffm);font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.bn-title{font-family:var(--ffd);font-size:1.1rem;color:var(--text);transition:color .2s}
+.bn-prev:hover .bn-title,.bn-next:hover .bn-title{color:var(--teal)}
+.bn-next{text-align:right}
+
+/* FOOTER */
+footer{background:var(--ink);padding:40px 80px;display:flex;justify-content:space-between;align-items:center;border-top:1px solid rgba(255,255,255,0.06)}
+.fc{font-family:var(--ffm);font-size:.62rem;color:rgba(247,243,236,0.22);letter-spacing:.07em}
+.fa{font-family:var(--ffd);font-size:1.1rem;color:var(--paper)}
+.fa span{color:var(--gold)}
+
+@media(max-width:900px){
+  nav{padding:0 20px}
+  .hero{grid-template-columns:1fr;padding:100px 24px 60px}
+  .hero-panel{display:none}
+  .stat-bar{grid-template-columns:repeat(2,1fr)}
+  .sec,.sec-alt,.sec-dk{padding:64px 24px}
+  .attack-grid,.cm-grid,.rw-grid{grid-template-columns:1fr}
+  .bottom-nav{flex-direction:column;gap:28px;padding:40px 24px;text-align:center}
+  footer{flex-direction:column;gap:12px;text-align:center;padding:32px 24px}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="umang_shah_HOME.html">Umang <span>Shah</span></a>
+  <a class="nav-back" href="umang_shah_HOME.html">← Back to Portfolio</a>
+  <div class="nav-badge">Distinction · Heriot-Watt 2023</div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-content">
+    <div class="hero-tag">Project 02 · Offensive Security · F21AN Coursework</div>
+    <h1 class="htitle">BeEFense:<em>Browser Exploitation</em></h1>
+    <div class="hsub">Hands-on Attack Demonstration &amp; Countermeasures Framework</div>
+    <p class="hdesc">
+      A live, hands-on investigation into how the <strong>Browser Exploitation Framework (BeEF)</strong>
+      enables attackers to compromise browsers, hijack sessions, and execute social engineering attacks —
+      conducted in a full Kali Linux lab environment with a real browser hooked and exploited.
+      Then came the harder part: building the defences.
+    </p>
+    <div class="hmeta">
+      <div class="hm-item"><span class="hm-label">Institution</span><span class="hm-value">Heriot-Watt University</span></div>
+      <div class="hm-item"><span class="hm-label">Programme</span><span class="hm-value">MSc Cyber Security (NCSC)</span></div>
+      <div class="hm-item"><span class="hm-label">Type</span><span class="hm-value">Individual Coursework</span></div>
+      <div class="hm-item"><span class="hm-label">Year</span><span class="hm-value">2023</span></div>
+      <div class="hm-item"><span class="hm-label">Grade</span><span class="hm-value" style="color:var(--gold)">Distinction (70%+)</span></div>
+    </div>
+  </div>
+  <div class="hero-panel">
+    <div class="threat-box">
+      <div class="threat-stat"><span class="ts-label">Modules Available</span><span class="ts-value">300+</span></div>
+      <div class="threat-stat"><span class="ts-label">Attack Vectors Explored</span><span class="ts-value">6</span></div>
+      <div class="threat-stat"><span class="ts-label">Cybercrimes via Social Engineering</span><span class="ts-value">98%</span></div>
+      <div class="threat-stat"><span class="ts-label">Lab Environment</span><span class="ts-value">Kali Linux VM</span></div>
+      <div class="threat-stat"><span class="ts-label">Browser Hooked Live</span><span class="ts-value">Yes ✓</span></div>
+      <div class="threat-stat"><span class="ts-label">Countermeasures Developed</span><span class="ts-value">6</span></div>
+      <div class="distinction-badge">
+        <span class="db-label">Academic Grade</span>
+        <span class="db-value">Distinction</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- STAT BAR -->
+<div class="stat-bar">
+  <div class="sb-item"><span class="sb-num">300+</span><span class="sb-lbl">BeEF Modules<br/>Available</span></div>
+  <div class="sb-item"><span class="sb-num">98%</span><span class="sb-lbl">Cybercrimes Involve<br/>Social Engineering</span></div>
+  <div class="sb-item"><span class="sb-num">6</span><span class="sb-lbl">Attack Vectors<br/>Demonstrated</span></div>
+  <div class="sb-item"><span class="sb-num">1st</span><span class="sb-lbl">Live Browser<br/>Hooked &amp; Exploited</span></div>
+</div>
+
+<!-- OVERVIEW -->
+<section class="sec" id="overview">
+  <div class="sh fade"><span class="snum">01 /</span><h2 class="st">Project Overview</h2><div class="sr"></div></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:start">
+    <div class="fade">
+      <p style="font-family:var(--ffd);font-size:1.2rem;line-height:1.65;font-style:italic;color:var(--text);margin-bottom:20px">"To defend against an attack, you must first understand how to execute it. This project gave me both."</p>
+      <p style="font-size:.95rem;color:var(--muted);line-height:1.82;margin-bottom:16px">Browser exploitation is one of the most prevalent and underestimated attack surfaces in modern cybersecurity. The <strong style="color:var(--text)">Browser Exploitation Framework (BeEF)</strong> is an open-source penetration testing tool with over 300 modules — used by ethical hackers globally to test browser security and simulate real-world attacks.</p>
+      <p style="font-size:.95rem;color:var(--muted);line-height:1.82;margin-bottom:16px">This wasn't a theoretical exercise. I set up a full <strong style="color:var(--text)">Kali Linux virtual machine environment</strong>, deployed BeEF, hooked a real browser, and demonstrated live attacks including session hijacking, cross-site scripting (XSS), cross-site request forgery (CSRF), and social engineering phishing techniques.</p>
+      <p style="font-size:.95rem;color:var(--muted);line-height:1.82">The harder — and more valuable — half of the work was developing a <strong style="color:var(--text)">comprehensive countermeasures framework</strong>: practical, actionable defences that organisations can implement against each attack vector demonstrated.</p>
+    </div>
+    <div class="fade">
+      <div class="callout"><strong>Why BeEF?</strong> Social engineering attacks account for <strong>98% of all cybercrimes</strong> (Proofpoint, 2022). BeEF provides a controlled, ethical environment to simulate the exact browser-based attack chains that real adversaries use — making it an essential tool for any penetration tester or security architect.</div>
+      <div class="callout teal"><strong>Real-World Relevance:</strong> The attack vectors demonstrated in this project map directly to OWASP Top 10 vulnerabilities — the industry's definitive list of the most critical web application security risks. Every technique explored here has caused documented enterprise breaches.</div>
+      <div class="callout gold"><strong>Academic Achievement:</strong> This individual coursework was awarded a <strong>Distinction grade (70%+)</strong> as part of the NCSC-certified MSc in Computer Science for Cyber Security at Heriot-Watt University — one of the UK's leading cyber security programmes.</div>
+    </div>
+  </div>
+
+  <div class="tags fade">
+    <span class="tag">BeEF Framework</span><span class="tag">Kali Linux</span><span class="tag">Browser Exploitation</span>
+    <span class="tag">Social Engineering</span><span class="tag">Session Hijacking</span><span class="tag">XSS</span>
+    <span class="tag">CSRF</span><span class="tag">Phishing Simulation</span><span class="tag">Penetration Testing</span>
+    <span class="tag">OWASP Top 10</span><span class="tag">Virtual Machine Lab</span><span class="tag">Ethical Hacking</span>
+    <span class="tag">Countermeasures</span><span class="tag">Web Application Security</span><span class="tag">Client-Side Attacks</span>
+  </div>
+</section>
+
+<!-- LAB SETUP -->
+<section class="sec sec-alt" id="methodology">
+  <div class="sh fade"><span class="snum">02 /</span><h2 class="st">Lab Environment &amp; Methodology</h2><div class="sr"></div></div>
+  <div class="steps fade">
+    <div class="step">
+      <div class="step-l"><div class="step-num">01</div><div class="step-line"></div></div>
+      <div class="step-c">
+        <div class="step-title">Kali Linux VM Setup</div>
+        <div class="step-body">Configured a Kali Linux virtual machine as the attack platform — the industry-standard OS for penetration testing. Installed and launched the BeEF framework, exposing the web-based GUI control panel (hook.js) on a local network. Configured firewall rules and network settings to enable controlled browser hooking without external exposure.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-l"><div class="step-num">02</div><div class="step-line"></div></div>
+      <div class="step-c">
+        <div class="step-title">Browser Hooking</div>
+        <div class="step-body">Deployed the BeEF hook script (hook.js) via a controlled webpage. Successfully hooked a target browser — establishing a persistent command-and-control channel between the BeEF console and the victim browser. Once hooked, the browser became fully accessible through BeEF's 300+ module library, allowing real-time command execution.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-l"><div class="step-num">03</div><div class="step-line"></div></div>
+      <div class="step-c">
+        <div class="step-title">Attack Vector Demonstration</div>
+        <div class="step-body">Systematically executed multiple attack categories — social engineering, session management attacks, network reconnaissance, and browser fingerprinting. Each attack was documented with methodology, execution steps, observed outcomes, and a critical analysis of real-world implications for enterprise environments.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-l"><div class="step-num">04</div><div class="step-line"></div></div>
+      <div class="step-c">
+        <div class="step-title">Impact Analysis</div>
+        <div class="step-body">For each attack vector, conducted a structured impact analysis: identifying affected stakeholders (individuals, organisations, society), potential financial and reputational damage, and the specific data or systems at risk. Mapped findings to OWASP Top 10 categories and real-world documented breach examples.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-l"><div class="step-num">05</div><div class="step-line"></div></div>
+      <div class="step-c">
+        <div class="step-title">Countermeasures Development</div>
+        <div class="step-body">Developed a practical, layered countermeasures framework for each attack vector — covering technical controls (browser hardening, CSP headers, HTTPS enforcement), procedural controls (awareness training, link verification), and detective controls (anomaly detection, session monitoring). Each countermeasure was evaluated for practicability in enterprise environments.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ATTACKS -->
+<div class="sec-dk" id="attacks">
+  <div class="sh fade"><span class="snum">03 /</span><h2 class="st">Attack Vectors Demonstrated</h2><div class="sr"></div></div>
+  <div class="attack-grid fade">
+    <div class="attack-card">
+      <span class="ac-num">Attack 01 · Social Engineering</span>
+      <div class="ac-name">Browser-Based Phishing</div>
+      <div class="ac-desc">Leveraged BeEF's social engineering modules to display convincing fake login dialogs and notification prompts directly within the hooked browser — without the victim leaving the legitimate page. Demonstrated how attackers harvest credentials while the user believes they're interacting with a trusted site.</div>
+      <div class="ac-impact">⚠ Credential Theft · Identity Fraud</div>
+    </div>
+    <div class="attack-card">
+      <span class="ac-num">Attack 02 · Session Management</span>
+      <div class="ac-name">Session Hijacking</div>
+      <div class="ac-desc">Demonstrated extraction of session cookies and tokens from the hooked browser — enabling an attacker to impersonate an authenticated user without knowing their password. Showed how a single hooked session can grant access to banking portals, email accounts, and enterprise applications.</div>
+      <div class="ac-impact">⚠ Account Takeover · Financial Loss</div>
+    </div>
+    <div class="attack-card">
+      <span class="ac-num">Attack 03 · Injection</span>
+      <div class="ac-name">Cross-Site Scripting (XSS)</div>
+      <div class="ac-desc">Executed persistent and reflected XSS attacks through BeEF's injection modules — demonstrating how malicious scripts can be injected into web pages viewed by other users. Showed how XSS enables keylogging, form data theft, and full DOM manipulation in victim browsers.</div>
+      <div class="ac-impact">⚠ Data Exfiltration · Keylogging</div>
+    </div>
+    <div class="attack-card">
+      <span class="ac-num">Attack 04 · Request Forgery</span>
+      <div class="ac-name">Cross-Site Request Forgery (CSRF)</div>
+      <div class="ac-desc">Demonstrated how BeEF can force an authenticated browser to make unauthorised requests to third-party services — triggering fund transfers, settings changes, or data deletion — all while the victim remains unaware. Evidenced the gap between server-side trust and user intent.</div>
+      <div class="ac-impact">⚠ Unauthorised Transactions · Data Deletion</div>
+    </div>
+    <div class="attack-card">
+      <span class="ac-num">Attack 05 · Reconnaissance</span>
+      <div class="ac-name">Browser Fingerprinting &amp; Network Scan</div>
+      <div class="ac-desc">Used BeEF's reconnaissance modules to extract detailed browser fingerprint data (OS, plugins, screen resolution, timezone, installed fonts) and perform internal network scanning through the victim's browser — mapping the internal network topology without any direct connection to it.</div>
+      <div class="ac-impact">⚠ Network Mapping · Targeted Attack Prep</div>
+    </div>
+    <div class="attack-card">
+      <span class="ac-num">Attack 06 · Malware Vector</span>
+      <div class="ac-name">Malicious Code Injection</div>
+      <div class="ac-desc">Demonstrated how BeEF can be combined with social engineering to prompt the download and execution of malicious payloads — including fake browser update prompts and file download lures. Showed the full kill chain from initial hook to potential ransomware delivery.</div>
+      <div class="ac-impact">⚠ Ransomware Delivery · System Compromise</div>
+    </div>
+  </div>
+</div>
+
+<!-- COUNTERMEASURES -->
+<section class="sec" id="countermeasures">
+  <div class="sh fade"><span class="snum">04 /</span><h2 class="st">Countermeasures Framework</h2><div class="sr"></div></div>
+  <p class="fade" style="font-size:.97rem;color:var(--muted);line-height:1.82;max-width:680px;margin-bottom:32px">The most valuable output of this project wasn't the attack demonstration — it was translating those findings into a practical, layered defence framework that security teams can actually implement. Each countermeasure directly addresses one or more attack vectors demonstrated.</p>
+  <div class="cm-grid fade">
+    <div class="cm-card"><div class="cm-ico">🔄</div><div><div class="cm-title">Keep Browsers Updated</div><div class="cm-body">Browser vendors continuously patch exploitable vulnerabilities. Enforcing browser update policies eliminates known attack vectors and reduces BeEF module effectiveness significantly. Critical for enterprise endpoint management.</div></div></div>
+    <div class="cm-card"><div class="cm-ico">🎓</div><div><div class="cm-title">Security Awareness Training</div><div class="cm-body">98% of attacks have a social engineering component. Regular, simulated phishing training — using tools like BeEF itself — builds employee resilience against fake login prompts, suspicious links, and social engineering lures.</div></div></div>
+    <div class="cm-card"><div class="cm-ico">🔒</div><div><div class="cm-title">HTTPS Enforcement &amp; CSP Headers</div><div class="cm-body">Content Security Policy (CSP) headers prevent malicious script injection by whitelisting approved content sources. HTTPS enforcement prevents man-in-the-middle hooking. Both are free, high-impact technical controls.</div></div></div>
+    <div class="cm-card"><div class="cm-ico">🔗</div><div><div class="cm-title">Link Verification Discipline</div><div class="cm-body">Users should verify URL legitimacy before clicking — checking spelling, padlock status (HTTPS), and hover-tooltip destination. Enterprise DNS filtering and web proxies provide a complementary technical layer.</div></div></div>
+    <div class="cm-card"><div class="cm-ico">🍪</div><div><div class="cm-title">Secure Cookie Attributes</div><div class="cm-body">Setting HttpOnly and Secure flags on session cookies prevents JavaScript-based cookie theft — directly mitigating session hijacking. SameSite=Strict prevents CSRF by blocking cross-origin cookie submission.</div></div></div>
+    <div class="cm-card"><div class="cm-ico">📊</div><div><div class="cm-title">Anomaly Detection &amp; Monitoring</div><div class="cm-body">SIEM platforms (Splunk, Sentinel) configured to detect unusual session behaviour, rapid geographic shifts, or impossible login patterns provide detective controls that catch successful compromises early.</div></div></div>
+  </div>
+</section>
+
+<!-- REAL WORLD -->
+<div class="sec-dk" id="impact">
+  <div class="sh fade"><span class="snum">05 /</span><h2 class="st">Real-World Impact</h2><div class="sr"></div></div>
+  <p class="fade" style="font-size:.97rem;color:rgba(247,243,236,0.55);line-height:1.82;max-width:680px;margin-bottom:32px">The techniques demonstrated in this project are not theoretical. Every attack vector explored has been used in documented real-world breaches — making this research directly applicable to enterprise security architecture.</p>
+  <div class="rw-grid fade">
+    <div class="rw-card"><span class="rw-ico">🏦</span><div class="rw-title">Banking &amp; Financial Services</div><div class="rw-body">Phishing + session hijacking via browser exploitation is the primary vector for internet banking fraud. This project's findings directly inform defensive architecture for online banking platforms.</div></div>
+    <div class="rw-card"><span class="rw-ico">🏢</span><div class="rw-title">Enterprise Security Awareness</div><div class="rw-body">CSRF and XSS vulnerabilities in enterprise web applications can allow attackers to escalate privileges, exfiltrate data, and pivot to internal systems. Understanding these attacks is essential for application security teams.</div></div>
+    <div class="rw-card"><span class="rw-ico">📱</span><div class="rw-title">Consumer Data Protection</div><div class="rw-body">Browser fingerprinting and network reconnaissance through hooked browsers can expose home network topology — enabling targeted attacks on IoT devices, smart home systems, and personal data stores.</div></div>
+  </div>
+
+  <div style="margin-top:40px" class="fade">
+    <div style="border:1px solid rgba(184,144,42,0.25);border-radius:3px;padding:28px;background:rgba(184,144,42,0.05)">
+      <div style="font-family:var(--ffm);font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;color:rgba(184,144,42,0.6);margin-bottom:12px">Skills Demonstrated</div>
+      <div style="display:flex;flex-wrap:wrap;gap:7px">
+        <span style="font-family:var(--ffm);font-size:.65rem;background:rgba(247,243,236,0.05);border:1px solid rgba(247,243,236,0.1);color:rgba(247,243,236,0.55);padding:3px 10px;border-radius:2px">Offensive Security</span>
+        <span style="font-family:var(--ffm);font-size:.65rem;background:rgba(247,243,236,0.05);border:1px solid rgba(247,243,236,0.1);color:rgba(247,243,236,0.55);padding:3px 10px;border-radius:2px">Penetration Testing</span>
+        <span style="font-family:var(--ffm);font-size:.65rem;background:rgba(247,243,236,0.05);border:1px solid rgba(247,243,236,0.1);color:rgba(247,243,236,0.55);padding:3px 10px;border-radius:2px">Social Engineering Analysis</span>
+        <span style="font-family:var(--ffm);font-size:.65rem;background:rgba(247,243,236,0.05);border:1px solid rgba(247,243,236,0.1);color:rgba(247,243,236,0.55);padding:3px 10px;border-radius:2px">Kali Linux</span>
+        <span style="font-family:var(--ffm);font-size:.65rem;background:rgba(247,243,236,0.05);border:1px solid rgba(247,243,236,0.1);color:rgba(247,243,236,0.55);padding:3px 10px;border-radius:2px">Web Application Security</span>
+        <span style="font-family:var(--ffm);font-size:.65rem;background:rgba(247,243,236,0.05);border:1px solid rgba(247,243,236,0.1);color:rgba(247,243,236,0.55);padding:3px 10px;border-radius:2px">OWASP Top 10</span>
+        <span style="font-family:var(--ffm);font-size:.65rem;background:rgba(247,243,236,0.05);border:1px solid rgba(247,243,236,0.1);color:rgba(247,243,236,0.55);padding:3px 10px;border-radius:2px">Security Architecture</span>
+        <span style="font-family:var(--ffm);font-size:.65rem;background:rgba(247,243,236,0.05);border:1px solid rgba(247,243,236,0.1);color:rgba(247,243,236,0.55);padding:3px 10px;border-radius:2px">Risk Assessment</span>
+        <span style="font-family:var(--ffm);font-size:.65rem;background:rgba(247,243,236,0.05);border:1px solid rgba(247,243,236,0.1);color:rgba(247,243,236,0.55);padding:3px 10px;border-radius:2px">Countermeasure Design</span>
+        <span style="font-family:var(--ffm);font-size:.65rem;background:rgba(247,243,236,0.05);border:1px solid rgba(247,243,236,0.1);color:rgba(247,243,236,0.55);padding:3px 10px;border-radius:2px">Technical Report Writing</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+  <a class="bn-prev" href="umang_shah_HOME.html">
+    <span class="bn-label">← Portfolio</span>
+    <span class="bn-title">Back to Home</span>
+  </a>
+  <a class="bn-next" href="umang_shah_FORENSISCAN.html">
+    <span class="bn-label">Next Project →</span>
+    <span class="bn-title">ForensiScan</span>
+  </a>
+</div>
+
+<footer>
+  <span class="fc">© 2025 Umang Shah · Heriot-Watt University · NCSC-Certified MSc</span>
+  <span class="fa">Umang <span>Shah</span></span>
+  <span class="fc">umangshah019@gmail.com</span>
+</footer>
+
+<script>
+const obs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');obs.unobserve(e.target)}})
+},{threshold:0.08,rootMargin:'0px 0px -30px 0px'})
+document.querySelectorAll('.fade').forEach(el=>obs.observe(el))
+</script>
+</body>
+</html>
